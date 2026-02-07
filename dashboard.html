@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic Platform - Dashboard Marketeur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .steps-container {
+            display: grid;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .step-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .step-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+        }
+
+        .step-description {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-secondary:hover {
+            background: #bdc3c7;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: #e8f4f8;
+        }
+
+        .upload-zone.dragover {
+            border-color: #2ecc71;
+            background: #d4edda;
+        }
+
+        .textarea-container {
+            margin: 20px 0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-family: inherit;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .result-box {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-waiting {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-ready {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .status-error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .help-box {
+            background: #fff9e6;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .example-prompts {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .example-prompts h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .example-link {
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .example-link:hover {
+            background: #e8f4f8;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧬 Semantic Platform</h1>
+            <p class="subtitle">Votre dashboard de marketing sémantique - Simple comme bonjour !</p>
+        </header>
+
+        <!-- ÉTAPE 1 : IMPORT PRODUITS -->
+        <div class="steps-container">
+            <div class="step-card" id="step1">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <h2 class="step-title">Importez vos produits</h2>
+                    <span class="status-badge status-waiting" id="status1">En attente</span>
+                </div>
+                <p class="step-description">
+                    Uploadez votre catalogue dans n'importe quel format : CSV, Excel, JSON, XML...
+                    L'IA détectera automatiquement la structure !
+                </p>
+
+                <div class="help-box">
+                    💡 <strong>Astuce :</strong> Vous pouvez uploader un export direct de votre Shopify, WooCommerce, ou même un simple fichier Excel.
+                </div>
+
+                <div class="upload-zone" id="uploadZone">
+                    <div style="font-size: 3em; margin-bottom: 10px;">📁</div>
+                    <h3>Glissez votre fichier ici</h3>
+                    <p>ou cliquez pour sélectionner</p>
+                    <input type="file" id="fileInput" style="display: none;" accept=".csv,.xlsx,.xls,.json,.xml,.txt">
+                </div>
+
+                <div class="loading" id="loading1">
+                    <div class="spinner"></div>
+                    <p>L'IA analyse votre fichier...</p>
+                </div>
+
+                <div class="result-box" id="result1">
+                    <h4>✅ Analyse terminée</h4>
+                    <p id="analysisResult"></p>
+                    <div class="button-group" style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="transformData()">
+                            ▶️ Transformer les données
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 2 : ADN DE MARQUE -->
+            <div class="step-card" id="step2">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <h2 class="step-title">Définissez votre ADN de marque</h2>
+                    <span class="status-badge status-waiting" id="status2">En attente</span>
+                </div>
+                <p class="step-description">
+                    Écrivez simplement comment vous voulez que l'IA parle de votre marque.
+                    Pas besoin de structure compliquée, juste du texte libre !
+                </p>
+
+                <div class="example-prompts">
+                    <h4>📚 Besoin d'inspiration ? Cliquez sur un exemple :</h4>
+                    <div class="example-link" onclick="loadExample('cosmetics')">
+                        🧴 Cosmétiques bio premium
+                    </div>
+                    <div class="example-link" onclick="loadExample('fashion')">
+                        👕 Mode streetwear
+                    </div>
+                    <div class="example-link" onclick="loadExample('saas')">
+                        💻 SaaS B2B
+                    </div>
+                </div>
+
+                <div class="textarea-container">
+                    <textarea id="brandPrompt" placeholder="Exemple :
+
+Notre marque s'appelle LuxeÉthique. Nous vendons des cosmétiques biologiques haut de gamme.
+
+NOTRE TON :
+Élégant mais accessible. Scientifique sans être pompeux. Passionné par la nature.
+
+NOS VALEURS :
+- Durabilité absolue
+- Transparence radicale
+- Innovation botanique
+
+CE QU'ON NE DIT JAMAIS :
+Nous ne promettons JAMAIS de résultats instantanés ou miraculeux.
+
+VOCABULAIRE :
+À utiliser : naturel, scientifique, durable, certifié
+À éviter : chimique, artificiel, bon marché
+
+Nos produits sont certifiés Cosmos Organic, B Corp, Leaping Bunny...
+"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="generateDNA()">
+                        🧬 Générer l'ADN automatiquement
+                    </button>
+                    <button class="btn btn-secondary" onclick="showExamples()">
+                        📖 Voir plus d'exemples
+                    </button>
+                </div>
+
+                <div class="loading" id="loading2">
+                    <div class="spinner"></div>
+                    <p>L'IA génère votre ADN de marque structuré...</p>
+                </div>
+
+                <div class="result-box" id="result2">
+                    <h4>✅ ADN généré avec succès</h4>
+                    <p id="dnaResult"></p>
+                    <div class="button-group" style="margin-top: 15px;">
+                        <button class="btn btn-success" onclick="saveDNA()">
+                            💾 Sauvegarder l'ADN
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 3 : TEST -->
+            <div class="step-card" id="step3">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <h2 class="step-title">Testez avant de publier</h2>
+                    <span class="status-badge status-waiting" id="status3">En attente</span>
+                </div>
+                <p class="step-description">
+                    Simulez différents types de visiteurs pour voir comment votre site s'adaptera.
+                </p>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="simulateVisitor('scientific')">
+                        🔬 Simuler un visiteur "Scientifique"
+                    </button>
+                    <button class="btn btn-primary" onclick="simulateVisitor('emotional')">
+                        ❤️ Simuler un visiteur "Émotionnel"
+                    </button>
+                    <button class="btn btn-primary" onclick="simulateVisitor('practical')">
+                        ⚡ Simuler un visiteur "Pratique"
+                    </button>
+                </div>
+
+                <div class="loading" id="loading3">
+                    <div class="spinner"></div>
+                    <p>Génération de la page adaptée...</p>
+                </div>
+
+                <div class="result-box" id="result3">
+                    <h4>✅ Simulation terminée</h4>
+                    <iframe id="previewFrame" style="width: 100%; height: 600px; border: none; border-radius: 10px; margin-top: 20px;"></iframe>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 4 : DÉPLOIEMENT -->
+            <div class="step-card" id="step4">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <h2 class="step-title">Déployez en production</h2>
+                    <span class="status-badge status-waiting" id="status4">En attente</span>
+                </div>
+                <p class="step-description">
+                    Tout est prêt ? Publiez vos changements en production en un clic !
+                </p>
+
+                <div class="help-box">
+                    ⚠️ <strong>Important :</strong> Le déploiement est instantané et sans interruption de service. Vous pouvez revenir en arrière à tout moment.
+                </div>
+
+                <div class="progress-bar" id="deployProgress" style="display: none;">
+                    <div class="progress-fill" id="deployProgressFill" style="width: 0%;">0%</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="deploy()" id="deployBtn">
+                        🚀 Déployer en production
+                    </button>
+                    <button class="btn btn-secondary" onclick="rollback()" id="rollbackBtn" style="display: none;">
+                        ⏪ Revenir en arrière
+                    </button>
+                </div>
+
+                <div class="result-box" id="result4">
+                    <h4>✅ Déploiement réussi</h4>
+                    <p id="deployResult"></p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>🧬 Semantic Platform v2.0 - Made with ❤️ for marketers</p>
+            <p>Besoin d'aide ? <a href="mailto:support@semanticplatform.com" style="color: white; text-decoration: underline;">support@semanticplatform.com</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration de l'API
+        const API_BASE = 'http://localhost:3000/api';
+        
+        let currentFileId = null;
+        let currentTransformId = null;
+        let currentSessionId = null;
+
+        // ========================================================================
+        // ÉTAPE 1 : IMPORT PRODUITS
+        // ========================================================================
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        // Clic sur la zone = ouvrir sélecteur
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        // Drag & drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) uploadFile(file);
+        });
+
+        // Sélection de fichier
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) uploadFile(file);
+        });
+
+        async function uploadFile(file) {
+            document.getElementById('loading1').classList.add('show');
+            document.getElementById('result1').classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_BASE}/import/analyze`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                document.getElementById('loading1').classList.remove('show');
+
+                if (result.success) {
+                    currentFileId = result.analysis.id;
+                    document.getElementById('analysisResult').innerHTML = `
+                        <strong>Format détecté :</strong> ${result.analysis.format}<br>
+                        <strong>Produits trouvés :</strong> ${result.analysis.estimatedProducts}<br>
+                        <strong>Confiance :</strong> ${(result.analysis.confidence * 100).toFixed(0)}%
+                    `;
+                    document.getElementById('result1').classList.add('show');
+                    document.getElementById('status1').textContent = 'Terminé';
+                    document.getElementById('status1').className = 'status-badge status-ready';
+                } else {
+                    alert('Erreur : ' + result.error);
+                }
+            } catch (error) {
+                document.getElementById('loading1').classList.remove('show');
+                alert('Erreur de connexion au serveur');
+            }
+        }
+
+        async function transformData() {
+            document.getElementById('loading1').classList.add('show');
+
+            try {
+                const response = await fetch(`${API_BASE}/import/transform`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileId: currentFileId,
+                        aiInstructions: 'Génère des descriptions professionnelles et attrayantes'
+                    })
+                });
+
+                const result = await response.json();
+                document.getElementById('loading1').classList.remove('show');
+
+                if (result.success) {
+                    currentTransformId = result.transformationId;
+                    alert(`✅ Transformation réussie !\n${result.stats.successfulTransforms} produits transformés`);
+                    
+                    // Commit automatique en test
+                    await fetch(`${API_BASE}/import/commit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            transformationId: currentTransformId,
+                            targetEnvironment: 'test'
+                        })
+                    });
+
+                    document.getElementById('status2').className = 'status-badge';
+                    document.getElementById('status2').style.background = '#3498db';
+                    document.getElementById('status2').textContent = 'À votre tour';
+                }
+            } catch (error) {
+                document.getElementById('loading1').classList.remove('show');
+                alert('Erreur : ' + error.message);
+            }
+        }
+
+        // ========================================================================
+        // ÉTAPE 2 : ADN DE MARQUE
+        // ========================================================================
+
+        function loadExample(type) {
+            const examples = {
+                cosmetics: `Notre marque s'appelle LuxeÉthique. Nous vendons des cosmétiques biologiques haut de gamme.
+
+NOTRE TON :
+Élégant mais accessible. Scientifique sans être pompeux. Passionné par la nature et l'innovation botanique.
+
+NOS VALEURS :
+- Durabilité absolue : nous prenons soin de la planète
+- Transparence radicale : traçabilité complète
+- Innovation scientifique au service du naturel
+- Commerce équitable avec nos partenaires
+
+CE QU'ON NE DIT JAMAIS :
+Nous ne promettons JAMAIS de résultats instantanés ou miraculeux.
+
+VOCABULAIRE :
+À utiliser : naturel, scientifique, durable, certifié, bio
+À éviter : chimique, artificiel, bon marché, rapide
+
+Nos produits sont certifiés Cosmos Organic, B Corp, Leaping Bunny.`,
+
+                fashion: `Yo ! Notre marque c'est UrbanFlow. On fait du streetwear pour les 16-30 ans.
+
+NOTRE VIBE :
+Cool, décomplexés, fun. Pas de prise de tête. On parle comme nos clients : direct, avec de l'humour.
+
+NOS VALEURS :
+- Qualité premium à prix accessible
+- Drops limités (pas de fast fashion)
+- Communauté avant tout
+- Engagement écolo (recyclage, seconde main)
+
+ON ÉVITE :
+Sonner vieux, corporate, chiant. Pas de "Madame, Monsieur".
+
+NOTRE LANGAGE :
+À fond : stylé, fresh, clean, dope, fire, vibe, drip
+À éviter : élégant, raffiné, distingué, sobre`,
+
+                saas: `Notre entreprise : DataSecure Pro. Solutions de cybersécurité pour PME/ETI.
+
+NOTRE TON :
+Professionnel mais humain. Expert mais pédagogue. Sérieux mais pas austère.
+
+NOS VALEURS :
+- Sécurité sans compromis
+- Accompagnement personnalisé (pas de hotline offshore)
+- Transparence totale (pas de frais cachés)
+- Souveraineté numérique (données en France)
+
+CE QU'ON ÉVITE :
+Les promesses de "sécurité à 100%". Le fear-mongering. Le jargon technique inutile.
+
+VOCABULAIRE :
+À utiliser : protection, conformité, RGPD, souveraineté
+À éviter : hacking, piratage (sans contexte)`
+            };
+
+            document.getElementById('brandPrompt').value = examples[type];
+        }
+
+        async function generateDNA() {
+            const prompt = document.getElementById('brandPrompt').value.trim();
+            
+            if (!prompt) {
+                alert('Veuillez écrire une description de votre marque !');
+                return;
+            }
+
+            document.getElementById('loading2').classList.add('show');
+            document.getElementById('result2').classList.remove('show');
+
+            try {
+                const response = await fetch(`${API_BASE}/brand-dna/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const result = await response.json();
+                document.getElementById('loading2').classList.remove('show');
+
+                if (result.success) {
+                    document.getElementById('dnaResult').innerHTML = `
+                        <strong>Marque :</strong> ${result.preview.name}<br>
+                        <strong>Ton :</strong> ${result.preview.tone.join(', ')}<br>
+                        <strong>Valeurs :</strong> ${result.preview.values.join(', ')}
+                    `;
+                    document.getElementById('result2').classList.add('show');
+                    document.getElementById('status2').textContent = 'Terminé';
+                    document.getElementById('status2').className = 'status-badge status-ready';
+                }
+            } catch (error) {
+                document.getElementById('loading2').classList.remove('show');
+                alert('Erreur : ' + error.message);
+            }
+        }
+
+        async function saveDNA() {
+            // Code de sauvegarde déjà géré dans generateDNA
+            alert('✅ ADN sauvegardé en mode test !');
+            document.getElementById('status3').className = 'status-badge';
+            document.getElementById('status3').style.background = '#3498db';
+            document.getElementById('status3').textContent = 'À votre tour';
+        }
+
+        function showExamples() {
+            window.open('/docs/EXEMPLES_PROMPTS.md', '_blank');
+        }
+
+        // ========================================================================
+        // ÉTAPE 3 : TEST
+        // ========================================================================
+
+        async function simulateVisitor(persona) {
+            document.getElementById('loading3').classList.add('show');
+            document.getElementById('result3').classList.remove('show');
+
+            try {
+                // Créer session si pas encore fait
+                if (!currentSessionId) {
+                    const sessionResp = await fetch(`${API_BASE}/test/create-session`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description: 'Test depuis dashboard' })
+                    });
+                    const sessionResult = await sessionResp.json();
+                    currentSessionId = sessionResult.sessionId;
+                }
+
+                // Simuler visiteur
+                const response = await fetch(`${API_BASE}/test/simulate-visitor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: currentSessionId,
+                        visitorProfile: {
+                            persona: persona,
+                            language: 'fr',
+                            country: 'FR',
+                            device: 'desktop'
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                document.getElementById('loading3').classList.remove('show');
+
+                if (result.success) {
+                    // Afficher dans iframe
+                    const iframe = document.getElementById('previewFrame');
+                    iframe.srcdoc = result.renderedPage;
+                    
+                    document.getElementById('result3').classList.add('show');
+                    document.getElementById('status3').textContent = 'Terminé';
+                    document.getElementById('status3').className = 'status-badge status-ready';
+                    document.getElementById('status4').className = 'status-badge';
+                    document.getElementById('status4').style.background = '#3498db';
+                    document.getElementById('status4').textContent = 'Prêt';
+                }
+            } catch (error) {
+                document.getElementById('loading3').classList.remove('show');
+                alert('Erreur : ' + error.message);
+            }
+        }
+
+        // ========================================================================
+        // ÉTAPE 4 : DÉPLOIEMENT
+        // ========================================================================
+
+        async function deploy() {
+            if (!confirm('Voulez-vous vraiment déployer en production ?')) {
+                return;
+            }
+
+            const progressBar = document.getElementById('deployProgress');
+            const progressFill = document.getElementById('deployProgressFill');
+            const deployBtn = document.getElementById('deployBtn');
+
+            progressBar.style.display = 'block';
+            deployBtn.disabled = true;
+
+            // Animation de progression
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = progress + '%';
+
+                if (progress >= 90) {
+                    clearInterval(interval);
+                }
+            }, 200);
+
+            try {
+                const response = await fetch(`${API_BASE}/deploy/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sourceSessionId: currentSessionId,
+                        rollbackOnError: true
+                    })
+                });
+
+                const result = await response.json();
+                
+                clearInterval(interval);
+                progressFill.style.width = '100%';
+                progressFill.textContent = '100%';
+
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    
+                    if (result.success) {
+                        document.getElementById('deployResult').innerHTML = `
+                            <strong>Déploiement réussi !</strong><br>
+                            ID : ${result.deploymentId}<br>
+                            Heure : ${new Date(result.timestamp).toLocaleString()}
+                        `;
+                        document.getElementById('result4').classList.add('show');
+                        document.getElementById('status4').textContent = '✅ Déployé';
+                        document.getElementById('status4').className = 'status-badge status-ready';
+                        document.getElementById('rollbackBtn').style.display = 'inline-flex';
+                    } else {
+                        alert('Erreur de déploiement : ' + result.error);
+                    }
+                    
+                    deployBtn.disabled = false;
+                }, 500);
+
+            } catch (error) {
+                clearInterval(interval);
+                progressBar.style.display = 'none';
+                deployBtn.disabled = false;
+                alert('Erreur : ' + error.message);
+            }
+        }
+
+        async function rollback() {
+            if (!confirm('Voulez-vous vraiment revenir à la version précédente ?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/deploy/rollback`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ deploymentId: 'latest' })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Rollback effectué avec succès !');
+                    document.getElementById('rollbackBtn').style.display = 'none';
+                }
+            } catch (error) {
+                alert('Erreur : ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
