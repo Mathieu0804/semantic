@@ -1,0 +1,392 @@
+// ============================================
+// PLATEFORME IA LOCALE - SCHEMA COMPLET
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// UTILISATEURS
+// ============================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  password      String?
+  role          String   @default("user")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  sites         Site[]
+  dialogues     Dialogue[]
+  analytics     VisitorAnalytics[]
+  
+  @@map("users")
+}
+
+// ============================================
+// IDENTITÉ ENTREPRISE
+// ============================================
+
+model CompanyIdentity {
+  id                String   @id @default(cuid())
+  name              String   @default("Mon Entreprise")
+  description       String?
+  slogan            String?
+  logo              String?
+  primaryColor      String?  @default("#3B82F6")
+  secondaryColor    String?  @default("#1E40AF")
+  accentColor       String?  @default("#10B981")
+  
+  email             String?
+  phone             String?
+  address           String?
+  city              String?
+  postalCode        String?
+  country           String?  @default("France")
+  website           String?
+  
+  facebook          String?
+  twitter           String?
+  linkedin          String?
+  instagram         String?
+  
+  metaTitle         String?
+  metaDescription   String?
+  keywords          String?
+  ldJson            String?
+  businessType      String?  @default("LocalBusiness")
+  
+  aiPersonality     String?
+  aiTone            String?  @default("professionnel")
+  aiExpertise       String?
+  
+  mcpServerUrl      String?
+  mcpEnabled        Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("company_identities")
+}
+
+// ============================================
+// SITES WEB
+// ============================================
+
+model Site {
+  id                String   @id @default(cuid())
+  userId            String?
+  name              String
+  domain            String?  @unique
+  description       String?
+  htmlContent       String?
+  cssContent        String?
+  jsContent         String?
+  theme             String?  @default("modern")
+  language          String?  @default("fr")
+  metaTitle         String?
+  metaDescription   String?
+  ldJson            String?
+  status            String   @default("draft")
+  publishedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pages             Page[]
+  products          Product[]
+  services          Service[]
+  analytics         VisitorAnalytics[]
+  
+  @@map("sites")
+}
+
+model Page {
+  id                String   @id @default(cuid())
+  siteId            String
+  name              String
+  slug              String
+  title             String?
+  content           String?
+  metaTitle         String?
+  metaDescription   String?
+  ldJson            String?
+  order             Int      @default(0)
+  status            String   @default("draft")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  site              Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  @@unique([siteId, slug])
+  @@map("pages")
+}
+
+// ============================================
+// PRODUITS
+// ============================================
+
+model Product {
+  id                String   @id @default(cuid())
+  siteId            String?
+  name              String
+  description       String?
+  shortDescription  String?
+  reference         String?  @unique
+  sku               String?
+  price             Float?
+  currency          String?  @default("EUR")
+  discountPrice     Float?
+  taxRate           Float?   @default(20.0)
+  images            String?
+  mainImage         String?
+  category          String?
+  subcategory       String?
+  tags              String?
+  stock             Int?
+  stockStatus       String?  @default("in_stock")
+  minOrder          Int?     @default(1)
+  metaTitle         String?
+  metaDescription   String?
+  ldJson            String?
+  status            String   @default("active")
+  featured          Boolean  @default(false)
+  viewCount         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  site              Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  @@index([siteId])
+  @@index([status])
+  @@map("products")
+}
+
+// ============================================
+// SERVICES
+// ============================================
+
+model Service {
+  id                String   @id @default(cuid())
+  siteId            String?
+  name              String
+  description       String?
+  shortDescription  String?
+  reference         String?
+  basePrice         Float?
+  currency          String?  @default("EUR")
+  pricingType       String?  @default("fixed")
+  duration          String?
+  images            String?
+  mainImage         String?
+  category          String?
+  tags              String?
+  metaTitle         String?
+  metaDescription   String?
+  ldJson            String?
+  status            String   @default("active")
+  featured          Boolean  @default(false)
+  viewCount         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  site              Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  @@index([siteId])
+  @@map("services")
+}
+
+// ============================================
+// CATÉGORIES
+// ============================================
+
+model Category {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  slug              String   @unique
+  parentId          String?
+  image             String?
+  order             Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("categories")
+}
+
+// ============================================
+// DIALOGUES
+// ============================================
+
+model Dialogue {
+  id                String   @id @default(cuid())
+  userId            String?
+  sessionId         String
+  type              String   @default("user")
+  source            String?
+  visitorId         String?
+  userMessage       String?
+  aiResponse        String?
+  context           String?
+  intent            String?
+  sentiment         String?
+  responseTime      Int?
+  tokensUsed        Int?
+  rating            Int?
+  feedback          String?
+  createdAt         DateTime @default(now())
+  
+  user              User?    @relation(fields: [userId], references: [id])
+  
+  @@index([sessionId])
+  @@index([visitorId])
+  @@map("dialogues")
+}
+
+// ============================================
+// ANALYTICS
+// ============================================
+
+model VisitorAnalytics {
+  id                String   @id @default(cuid())
+  siteId            String?
+  userId            String?
+  visitorId         String
+  sessionId         String
+  sessionDuration   Int?
+  deviceType        String?
+  browser           String?
+  os                String?
+  screenWidth       Int?
+  country           String?
+  city              String?
+  ip                String?
+  pagesVisited      String?
+  entryPage         String?
+  exitPage          String?
+  productsViewed    String?
+  searchQueries     String?
+  conversions       String?
+  conversionValue   Float?
+  referrer          String?
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  createdAt         DateTime @default(now())
+  
+  site              Site?    @relation(fields: [siteId], references: [id])
+  user              User?    @relation(fields: [userId], references: [id])
+  
+  @@index([visitorId])
+  @@index([sessionId])
+  @@map("visitor_analytics")
+}
+
+// ============================================
+// PATTERNS
+// ============================================
+
+model Pattern {
+  id                String   @id @default(cuid())
+  type              String
+  category          String?
+  pattern           String?
+  insights          String?
+  confidence        Float?
+  frequency         Int      @default(1)
+  periodStart       DateTime?
+  periodEnd         DateTime?
+  suggestions       String?
+  status            String   @default("active")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("patterns")
+}
+
+// ============================================
+// MCP CONNECTIONS
+// ============================================
+
+model MCPConnection {
+  id                String   @id @default(cuid())
+  clientName        String?
+  clientType        String?
+  clientIp          String?
+  sessionId         String   @unique
+  token             String   @unique
+  permissions       String?
+  rateLimit         Int?     @default(100)
+  status            String   @default("active")
+  lastActivity      DateTime?
+  totalRequests     Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([token])
+  @@index([status])
+  @@map("mcp_connections")
+}
+
+// ============================================
+// MCP REQUESTS
+// ============================================
+
+model MCPRequest {
+  id                String   @id @default(cuid())
+  connectionId      String?
+  endpoint          String
+  method            String
+  payload           String?
+  response          String?
+  statusCode        Int?
+  responseTime      Int?
+  context           String?
+  createdAt         DateTime @default(now())
+  
+  @@index([connectionId])
+  @@map("mcp_requests")
+}
+
+// ============================================
+// CONFIGURATION SYSTÈME
+// ============================================
+
+model SystemConfig {
+  id                String   @id @default(cuid())
+  key               String   @unique
+  value             String?
+  description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("system_configs")
+}
+
+// ============================================
+// TÂCHES PLANIFIÉES
+// ============================================
+
+model ScheduledTask {
+  id                String   @id @default(cuid())
+  name              String
+  type             String
+  frequency        String
+  lastRun          DateTime?
+  nextRun          DateTime?
+  config           String?
+  status           String   @default("active")
+  lastResult       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@map("scheduled_tasks")
+}
