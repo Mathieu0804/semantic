@@ -1,7 +1,0 @@
-{
-  "provider": "gemini",
-  "apiKey": "${GEMINI_API_KEY}",
-  "model": "gemini-1.5-flash",
-  "maxTokens": 2048,
-  "temperature": 0.7
-}
