@@ -1,0 +1,76 @@
+// prisma/schema.prisma
+// Schéma avec tables pour l'auto-modification
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════
+// TABLES EXISTANTES (voir schema original)
+// ═══════════════════════════════════════════
+
+// ... Entreprise, Produit, etc ...
+
+// ═══════════════════════════════════════════
+// NOUVELLES TABLES - AI BUILDER
+// ═══════════════════════════════════════════
+
+// Versions des composants/fichiers
+model ComponentVersion {
+  id          String   @id @default(cuid())
+  
+  filePath    String   // ex: "src/app/page.tsx"
+  fileName    String   // ex: "page.tsx"
+  code        String   // Le code complet du fichier
+  
+  description String   // Description de la modification
+  version     Int      // Numéro de version incrémental
+  metadata    String   @default("{}")  // JSON: action, timestamp, etc
+  
+  createdBy   String   @default("ai")
+  createdAt   DateTime @default(now())
+  
+  @@index([filePath])
+  @@index([version])
+  @@map("component_versions")
+}
+
+// Historique des actions du builder
+model BuilderAction {
+  id          String   @id @default(cuid())
+  
+  action      String   // "create", "modify", "delete"
+  target      String   // Fichier cible
+  prompt      String   // Demande utilisateur originale
+  code        String?  // Code généré
+  
+  applied     Boolean  @default(false)
+  success     Boolean?
+  error       String?
+  
+  versionId   String?  // Lien vers ComponentVersion si succès
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([action])
+  @@index([applied])
+  @@index([createdAt])
+  @@map("builder_actions")
+}
+
+// Prévisualisations temporaires (optionnel)
+model Preview {
+  id          String   @id @default(cuid())
+  code        String   // Code à prévisualiser
+  filePath    String   // Fichier concerné
+  expiresAt   DateTime // Auto-suppression après X temps
+  createdAt   DateTime @default(now())
+  
+  @@index([expiresAt])
+  @@map("previews")
+}
