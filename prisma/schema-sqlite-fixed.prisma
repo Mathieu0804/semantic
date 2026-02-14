@@ -1,4 +1,6 @@
-// Schéma de base de données pour l'assistant IA PME
+// prisma/schema.prisma
+// Schéma corrigé pour SQLite (compatible Render)
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,16 +21,16 @@ model Entreprise {
   telephone       String
   adresse         String?
   descriptionBreve String?
-  descriptionLongue String? @db.Text
-  logo            String?  // URL ou chemin fichier
+  descriptionLongue String?  // Pas de @db.Text avec SQLite
+  logo            String?
   couleurPrimaire String   @default("#3B82F6")
   couleurSecondaire String @default("#10B981")
-  reseauxSociaux  Json     @default("{}")  // {facebook: url, linkedin: url, ...}
+  reseauxSociaux  String   @default("{}")  // JSON stocké en String
   
   // SEO
   metaTitle       String?
   metaDescription String?
-  keywords        Json     @default("[]")
+  keywords        String   @default("[]")  // JSON stocké en String
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -50,19 +52,19 @@ model Produit {
   entrepriseId    String
   
   nom             String
-  description     String   @db.Text
+  description     String
   prix            Float
   prixPromo       Float?
   devise          String   @default("EUR")
   
   categorie       String?
-  tags            Json     @default("[]")
+  tags            String   @default("[]")  // JSON stocké en String
   
   stock           Int      @default(0)
   stockMin        Int      @default(5)
   enVente         Boolean  @default(true)
   
-  images          Json     @default("[]")  // Array d'URLs
+  images          String   @default("[]")  // JSON stocké en String
   
   // SEO
   slug            String   @unique
@@ -90,12 +92,12 @@ model SiteGenere {
   version         Int      @default(1)
   actif           Boolean  @default(false)
   
-  configuration   Json     // {pages, sections, styles, ...}
-  codeHTML        String   @db.Text
-  codeCSS         String   @db.Text
-  codeJS          String?  @db.Text
+  configuration   String   // JSON stocké en String
+  codeHTML        String
+  codeCSS         String
+  codeJS          String?
   
-  ldJson          String?  @db.Text  // Structured data pour SEO
+  ldJson          String?
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -115,8 +117,8 @@ model Conversation {
   entrepriseId    String?
   sessionId       String   @unique
   
-  contexte        String   // "generation_site", "gestion_catalogue", "analyse", "general"
-  metadata        Json     @default("{}")
+  contexte        String
+  metadata        String   @default("{}")  // JSON stocké en String
   
   active          Boolean  @default(true)
   createdAt       DateTime @default(now())
@@ -134,9 +136,9 @@ model Message {
   id              String   @id @default(cuid())
   conversationId  String
   
-  role            String   // "user", "assistant", "system"
-  content         String   @db.Text
-  metadata        Json     @default("{}")
+  role            String
+  content         String
+  metadata        String   @default("{}")  // JSON stocké en String
   
   createdAt       DateTime @default(now())
   
@@ -153,9 +155,9 @@ model InteractionProduit {
   id              String   @id @default(cuid())
   produitId       String
   
-  type            String   // "vue", "clic_panier", "achat", "recherche"
-  source          String?  // "site", "email", "recherche"
-  metadata        Json     @default("{}")
+  type            String
+  source          String?
+  metadata        String   @default("{}")  // JSON stocké en String
   
   timestamp       DateTime @default(now())
   
@@ -173,13 +175,13 @@ model Email {
   de              String
   destinataire    String
   sujet           String
-  contenu         String   @db.Text
+  contenu         String
   
-  type            String   // "demande_info", "commande", "reclamation", "suggestion"
-  sentiment       String?  // "positif", "neutre", "negatif"
+  type            String
+  sentiment       String?
   
   traite          Boolean  @default(false)
-  reponse         String?  @db.Text
+  reponse         String?
   
   createdAt       DateTime @default(now())
   
@@ -196,12 +198,12 @@ model Rapport {
   id              String   @id @default(cuid())
   entrepriseId    String
   
-  type            String   // "hebdomadaire", "mensuel", "alerte"
+  type            String
   titre           String
-  contenu         String   @db.Text
+  contenu         String
   
-  insights        Json     @default("[]")  // [{type: "stock_faible", produitId, ...}]
-  recommandations Json     @default("[]")  // [{action: "augmenter_stock", ...}]
+  insights        String   @default("[]")  // JSON stocké en String
+  recommandations String   @default("[]")  // JSON stocké en String
   
   lu              Boolean  @default(false)
   
@@ -222,15 +224,15 @@ model Rapport {
 model Tache {
   id              String   @id @default(cuid())
   
-  type            String   // "analyse_emails", "generation_rapport", "optimisation_seo", etc.
+  type            String
   priorite        Int      @default(5)
   
-  statut          String   @default("en_attente")  // "en_attente", "en_cours", "terminee", "erreur"
+  statut          String   @default("en_attente")
   
-  input           Json     // Données d'entrée pour la tâche
-  output          Json?    // Résultat de la tâche
+  input           String   // JSON stocké en String
+  output          String?  // JSON stocké en String
   
-  erreur          String?  @db.Text
+  erreur          String?
   
   createdAt       DateTime @default(now())
   startedAt       DateTime?
