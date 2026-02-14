@@ -1,0 +1,67 @@
+# render.yaml - Configuration pour déploiement sur Render.com
+services:
+  # Web Service (Application Next.js)
+  - type: web
+    name: pme-ia-assistant
+    runtime: node
+    plan: free  # Plan gratuit (changez en 'starter' pour production)
+    region: frankfurt  # ou 'oregon', 'singapore', 'frankfurt'
+    
+    # Build configuration
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm start
+    
+    # Variables d'environnement
+    envVars:
+      - key: NODE_ENV
+        value: production
+      
+      - key: DATABASE_URL
+        value: file:./prod.db
+      
+      # ⚠️ IMPORTANT: Ajoutez votre clé API Gemini dans le Dashboard Render
+      - key: GEMINI_API_KEY
+        sync: false  # À configurer manuellement dans le Dashboard
+      
+      - key: GEMINI_MODEL
+        value: gemini-pro
+      
+      - key: AI_TEMPERATURE
+        value: "0.7"
+      
+      - key: AI_MAX_TOKENS
+        value: "2048"
+      
+      - key: NEXT_PUBLIC_APP_URL
+        fromService:
+          type: web
+          name: pme-ia-assistant
+          envVarKey: RENDER_EXTERNAL_URL
+      
+      # JWT Secret (généré aléatoirement)
+      - key: JWT_SECRET
+        generateValue: true
+      
+      - key: ENABLE_ANALYTICS
+        value: "true"
+      
+      - key: TASK_INTERVAL
+        value: "60"
+      
+      - key: RAPPORT_INTERVAL
+        value: "10080"
+    
+    # Health check
+    healthCheckPath: /
+    
+    # Disque persistant pour SQLite (Plan payant uniquement)
+    # disk:
+    #   name: pme-ia-data
+    #   mountPath: /app/prisma
+    #   sizeGB: 1
+
+# Notes de déploiement:
+# 1. La base de données SQLite fonctionnera mais les données seront perdues à chaque redéploiement
+#    sur le plan gratuit (pas de disque persistant)
+# 2. Pour production, utilisez PostgreSQL (voir documentation Render)
+# 3. Ajoutez votre GEMINI_API_KEY manuellement dans le Dashboard après création

@@ -1,0 +1,243 @@
+// Schéma de base de données pour l'assistant IA PME
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ════════════════════════════════════════════════════════════
+// ENTREPRISE - Identité et configuration
+// ════════════════════════════════════════════════════════════
+model Entreprise {
+  id              String   @id @default(cuid())
+  nom             String
+  slogan          String?
+  email           String
+  telephone       String
+  adresse         String?
+  descriptionBreve String?
+  descriptionLongue String? @db.Text
+  logo            String?  // URL ou chemin fichier
+  couleurPrimaire String   @default("#3B82F6")
+  couleurSecondaire String @default("#10B981")
+  reseauxSociaux  Json     @default("{}")  // {facebook: url, linkedin: url, ...}
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  keywords        Json     @default("[]")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  produits        Produit[]
+  siteGenere      SiteGenere[]
+  conversations   Conversation[]
+  rapports        Rapport[]
+  
+  @@map("entreprises")
+}
+
+// ════════════════════════════════════════════════════════════
+// PRODUITS / SERVICES - Catalogue
+// ════════════════════════════════════════════════════════════
+model Produit {
+  id              String   @id @default(cuid())
+  entrepriseId    String
+  
+  nom             String
+  description     String   @db.Text
+  prix            Float
+  prixPromo       Float?
+  devise          String   @default("EUR")
+  
+  categorie       String?
+  tags            Json     @default("[]")
+  
+  stock           Int      @default(0)
+  stockMin        Int      @default(5)
+  enVente         Boolean  @default(true)
+  
+  images          Json     @default("[]")  // Array d'URLs
+  
+  // SEO
+  slug            String   @unique
+  metaDescription String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  entreprise      Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  interactions    InteractionProduit[]
+  
+  @@index([entrepriseId])
+  @@index([categorie])
+  @@index([slug])
+  @@map("produits")
+}
+
+// ════════════════════════════════════════════════════════════
+// SITE WEB GÉNÉRÉ
+// ════════════════════════════════════════════════════════════
+model SiteGenere {
+  id              String   @id @default(cuid())
+  entrepriseId    String
+  
+  version         Int      @default(1)
+  actif           Boolean  @default(false)
+  
+  configuration   Json     // {pages, sections, styles, ...}
+  codeHTML        String   @db.Text
+  codeCSS         String   @db.Text
+  codeJS          String?  @db.Text
+  
+  ldJson          String?  @db.Text  // Structured data pour SEO
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  entreprise      Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  
+  @@index([entrepriseId])
+  @@index([actif])
+  @@map("sites_generes")
+}
+
+// ════════════════════════════════════════════════════════════
+// CONVERSATIONS - Historique chatbot
+// ════════════════════════════════════════════════════════════
+model Conversation {
+  id              String   @id @default(cuid())
+  entrepriseId    String?
+  sessionId       String   @unique
+  
+  contexte        String   // "generation_site", "gestion_catalogue", "analyse", "general"
+  metadata        Json     @default("{}")
+  
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  entreprise      Entreprise? @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  messages        Message[]
+  
+  @@index([sessionId])
+  @@index([entrepriseId])
+  @@map("conversations")
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  conversationId  String
+  
+  role            String   // "user", "assistant", "system"
+  content         String   @db.Text
+  metadata        Json     @default("{}")
+  
+  createdAt       DateTime @default(now())
+  
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@index([conversationId])
+  @@map("messages")
+}
+
+// ════════════════════════════════════════════════════════════
+// ANALYTICS - Interactions et patterns
+// ════════════════════════════════════════════════════════════
+model InteractionProduit {
+  id              String   @id @default(cuid())
+  produitId       String
+  
+  type            String   // "vue", "clic_panier", "achat", "recherche"
+  source          String?  // "site", "email", "recherche"
+  metadata        Json     @default("{}")
+  
+  timestamp       DateTime @default(now())
+  
+  produit         Produit @relation(fields: [produitId], references: [id], onDelete: Cascade)
+  
+  @@index([produitId])
+  @@index([type])
+  @@index([timestamp])
+  @@map("interactions_produits")
+}
+
+model Email {
+  id              String   @id @default(cuid())
+  
+  de              String
+  destinataire    String
+  sujet           String
+  contenu         String   @db.Text
+  
+  type            String   // "demande_info", "commande", "reclamation", "suggestion"
+  sentiment       String?  // "positif", "neutre", "negatif"
+  
+  traite          Boolean  @default(false)
+  reponse         String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([type])
+  @@index([traite])
+  @@index([createdAt])
+  @@map("emails")
+}
+
+// ════════════════════════════════════════════════════════════
+// RAPPORTS - Analyses hebdomadaires de l'IA
+// ════════════════════════════════════════════════════════════
+model Rapport {
+  id              String   @id @default(cuid())
+  entrepriseId    String
+  
+  type            String   // "hebdomadaire", "mensuel", "alerte"
+  titre           String
+  contenu         String   @db.Text
+  
+  insights        Json     @default("[]")  // [{type: "stock_faible", produitId, ...}]
+  recommandations Json     @default("[]")  // [{action: "augmenter_stock", ...}]
+  
+  lu              Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  
+  entreprise      Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  
+  @@index([entrepriseId])
+  @@index([type])
+  @@index([lu])
+  @@index([createdAt])
+  @@map("rapports")
+}
+
+// ════════════════════════════════════════════════════════════
+// TÂCHES - Queue pour l'IA agentique
+// ════════════════════════════════════════════════════════════
+model Tache {
+  id              String   @id @default(cuid())
+  
+  type            String   // "analyse_emails", "generation_rapport", "optimisation_seo", etc.
+  priorite        Int      @default(5)
+  
+  statut          String   @default("en_attente")  // "en_attente", "en_cours", "terminee", "erreur"
+  
+  input           Json     // Données d'entrée pour la tâche
+  output          Json?    // Résultat de la tâche
+  
+  erreur          String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  startedAt       DateTime?
+  completedAt     DateTime?
+  
+  @@index([statut])
+  @@index([priorite])
+  @@index([createdAt])
+  @@map("taches")
+}
