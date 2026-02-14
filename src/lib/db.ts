@@ -1,7 +1,6 @@
-// src/lib/db.ts
+// src/lib/db.ts - Client Prisma
 import { PrismaClient } from '@prisma/client'
 
-// Pattern singleton pour éviter multiples connexions en dev
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
 export const prisma =

@@ -1,6 +1,9 @@
 'use client'
 
+// src/components/ChatBot.tsx - Interface de chat avec Gemini
 import { useState, useRef, useEffect } from 'react'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -35,7 +38,6 @@ export function ChatBot({ context, onCodeGenerated }: ChatBotProps) {
     setLoading(true)
 
     try {
-      // Utilise Gemini API (compatible Render.com)
       const response = await fetch('/api/gemini/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,9 +47,16 @@ export function ChatBot({ context, onCodeGenerated }: ChatBotProps) {
         })
       })
 
-      if (!response.ok) throw new Error('Erreur API')
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
 
       const data = await response.json()
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Erreur inconnue')
+      }
+
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.response
@@ -55,15 +64,14 @@ export function ChatBot({ context, onCodeGenerated }: ChatBotProps) {
 
       setMessages(prev => [...prev, assistantMessage])
 
-      // Si du code est généré et un callback existe
       if (onCodeGenerated && data.code) {
         onCodeGenerated(data.code)
       }
-    } catch (error) {
-      console.error('Erreur:', error)
+    } catch (error: any) {
+      console.error('Erreur chat:', error)
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '❌ Désolé, une erreur est survenue. Vérifiez que Gemini API est bien configurée (GEMINI_API_KEY).'
+        content: `❌ Erreur: ${error.message}. Vérifiez que Gemini API est bien configurée.`
       }])
     } finally {
       setLoading(false)
@@ -72,7 +80,7 @@ export function ChatBot({ context, onCodeGenerated }: ChatBotProps) {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
-      <div className="bg-primary text-white p-4 rounded-t-lg">
+      <div className="bg-blue-600 text-white p-4 rounded-t-lg">
         <h3 className="font-semibold">💬 Assistant IA</h3>
         <p className="text-sm opacity-90">Propulsé par Google Gemini</p>
       </div>
@@ -81,23 +89,20 @@ export function ChatBot({ context, onCodeGenerated }: ChatBotProps) {
         {messages.length === 0 && (
           <div className="text-center text-gray-500 mt-8">
             <p className="text-2xl mb-2">👋</p>
-            <p>Bonjour ! Comment puis-je vous aider aujourd'hui ?</p>
+            <p>Bonjour ! Je suis votre assistant IA.</p>
+            <p className="text-sm mt-2">Posez-moi une question pour commencer.</p>
           </div>
         )}
 
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`chat-message ${
-              msg.role === 'user'
-                ? 'ml-auto max-w-[80%]'
-                : 'mr-auto max-w-[80%]'
-            }`}
+            className={`${msg.role === 'user' ? 'ml-auto' : 'mr-auto'} max-w-[80%]`}
           >
             <div
               className={`p-3 rounded-lg ${
                 msg.role === 'user'
-                  ? 'bg-primary text-white'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-900'
               }`}
             >
@@ -123,22 +128,19 @@ export function ChatBot({ context, onCodeGenerated }: ChatBotProps) {
 
       <div className="p-4 border-t">
         <div className="flex gap-2">
-          <input
-            type="text"
+          <Input
             value={input}
             onChange={e => setInput(e.target.value)}
-            onKeyPress={e => e.key === 'Enter' && sendMessage()}
+            onKeyPress={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
             placeholder="Tapez votre message..."
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             disabled={loading}
           />
-          <button
+          <Button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Envoyer
-          </button>
+            {loading ? '...' : 'Envoyer'}
+          </Button>
         </div>
       </div>
     </div>

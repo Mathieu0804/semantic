@@ -1,4 +1,4 @@
-// src/app/api/gemini/chat/route.ts
+// src/app/api/gemini/chat/route.ts - Endpoint chat avec Gemini
 import { NextRequest, NextResponse } from 'next/server'
 import { gemini, SYSTEM_PROMPTS } from '@/lib/gemini'
 
@@ -21,8 +21,6 @@ export async function POST(request: NextRequest) {
     const systemPrompt = SYSTEM_PROMPTS[context as keyof typeof SYSTEM_PROMPTS] || SYSTEM_PROMPTS.generationSite
 
     // Préparer les messages avec le contexte système
-    // Note: Gemini n'a pas de "system message" dans l'historique,
-    // donc on l'ajoute au premier message utilisateur
     const fullMessages = [
       { 
         role: 'user' as const, 
