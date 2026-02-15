@@ -15,7 +15,7 @@ datasource db {
 // ENTREPRISE - Identité et configuration
 // ════════════════════════════════════════════════════════════
 model Entreprise {
-  id              int   @id 
+  id              Int   @id 
   nom             String
   slogan          String?
   email           String
@@ -50,7 +50,7 @@ model Entreprise {
 // ════════════════════════════════════════════════════════════
 model Produit {
   id              String   @id @default(cuid())
-  entrepriseId    int
+  entrepriseId    Int
   
   nom             String
   description     String
@@ -88,7 +88,7 @@ model Produit {
 // ════════════════════════════════════════════════════════════
 model SiteGenere {
   id              String   @id @default(cuid())
-  entrepriseId    int
+  entrepriseId    Int
   
   version         Int      @default(1)
   actif           Boolean  @default(false)
@@ -115,7 +115,7 @@ model SiteGenere {
 // ════════════════════════════════════════════════════════════
 model Conversation {
   id              String   @id @default(cuid())
-  entrepriseId    int?      //le "?"  signie l'aspect facultatif
+  entrepriseId    Int?      //le "?"  signie l'aspect facultatif
   sessionId       String   @unique
   
   contexte        String
@@ -197,7 +197,7 @@ model Email {
 // ════════════════════════════════════════════════════════════
 model Rapport {
   id              String   @id @default(cuid())
-  entrepriseId    int
+  entrepriseId    Int
   
   type            String
   titre           String
