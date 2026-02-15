@@ -15,7 +15,7 @@ datasource db {
 // ENTREPRISE - Identité et configuration
 // ════════════════════════════════════════════════════════════
 model Entreprise {
-  id              String   @id 
+  id              int   @id 
   nom             String
   slogan          String?
   email           String

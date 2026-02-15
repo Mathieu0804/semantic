@@ -1,33 +1,17 @@
-'use server'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-// ========================================================
-// GET - Récupérer l'entreprise (singleton id: 1)
-// ========================================================
+// GET
 export async function GET() {
   try {
-    const entreprise = await prisma.entreprise.findUnique({
-      where: { id: 1 }
-    })
-
-    return NextResponse.json({
-      success: true,
-      data: entreprise
-    })
+    const entreprise = await prisma.entreprise.findUnique({ where: { id: 1 } })
+    return NextResponse.json({ success: true, data: entreprise })
   } catch (error: any) {
-    console.error('Erreur GET entreprise:', error)
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
 
-// ========================================================
-// POST - Créer ou mettre à jour l'entreprise (singleton)
-// ========================================================
+// POST - create/update singleton
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -51,7 +35,7 @@ export async function POST(request: NextRequest) {
         keywords: JSON.stringify(body.keywords || []),
       },
       create: {
-        id: 1, // 👈 Id unique obligatoire
+        id: 1,
         nom: body.nom,
         slogan: body.slogan,
         email: body.email,
@@ -66,18 +50,11 @@ export async function POST(request: NextRequest) {
         metaTitle: body.metaTitle,
         metaDescription: body.metaDescription,
         keywords: JSON.stringify(body.keywords || []),
-      }
+      },
     })
 
-    return NextResponse.json({
-      success: true,
-      data: entreprise
-    })
+    return NextResponse.json({ success: true, data: entreprise })
   } catch (error: any) {
-    console.error('Erreur POST entreprise:', error)
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
