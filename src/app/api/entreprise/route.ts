@@ -1,12 +1,17 @@
-// src/app/api/entreprise/route.ts - CRUD Entreprise
+'use server'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-// GET - Récupérer l'entreprise
+// ========================================================
+// GET - Récupérer l'entreprise (singleton id: 1)
+// ========================================================
 export async function GET() {
   try {
-    const entreprise = await prisma.entreprise.findFirst()
-    
+    const entreprise = await prisma.entreprise.findUnique({
+      where: { id: 1 }
+    })
+
     return NextResponse.json({
       success: true,
       data: entreprise
@@ -20,59 +25,50 @@ export async function GET() {
   }
 }
 
-// POST - Créer ou mettre à jour l'entreprise
+// ========================================================
+// POST - Créer ou mettre à jour l'entreprise (singleton)
+// ========================================================
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
-    // Vérifier si une entreprise existe déjà
-    const existing = await prisma.entreprise.findFirst()
-    
-    let entreprise
-    
-    if (existing) {
-      // Mettre à jour
-      entreprise = await prisma.entreprise.update({
-        where: { id: existing.id },
-        data: {
-          nom: body.nom,
-          slogan: body.slogan,
-          email: body.email,
-          telephone: body.telephone,
-          adresse: body.adresse,
-          descriptionBreve: body.descriptionBreve,
-          descriptionLongue: body.descriptionLongue,
-          logo: body.logo,
-          couleurPrimaire: body.couleurPrimaire || '#3B82F6',
-          couleurSecondaire: body.couleurSecondaire || '#10B981',
-          reseauxSociaux: JSON.stringify(body.reseauxSociaux || {}),
-          metaTitle: body.metaTitle,
-          metaDescription: body.metaDescription,
-          keywords: JSON.stringify(body.keywords || []),
-        }
-      })
-    } else {
-      // Créer
-      entreprise = await prisma.entreprise.create({
-        data: {
-          nom: body.nom,
-          slogan: body.slogan,
-          email: body.email,
-          telephone: body.telephone,
-          adresse: body.adresse,
-          descriptionBreve: body.descriptionBreve,
-          descriptionLongue: body.descriptionLongue,
-          logo: body.logo,
-          couleurPrimaire: body.couleurPrimaire || '#3B82F6',
-          couleurSecondaire: body.couleurSecondaire || '#10B981',
-          reseauxSociaux: JSON.stringify(body.reseauxSociaux || {}),
-          metaTitle: body.metaTitle,
-          metaDescription: body.metaDescription,
-          keywords: JSON.stringify(body.keywords || []),
-        }
-      })
-    }
-    
+
+    const entreprise = await prisma.entreprise.upsert({
+      where: { id: 1 },
+      update: {
+        nom: body.nom,
+        slogan: body.slogan,
+        email: body.email,
+        telephone: body.telephone,
+        adresse: body.adresse,
+        descriptionBreve: body.descriptionBreve,
+        descriptionLongue: body.descriptionLongue,
+        logo: body.logo,
+        couleurPrimaire: body.couleurPrimaire || '#3B82F6',
+        couleurSecondaire: body.couleurSecondaire || '#10B981',
+        reseauxSociaux: JSON.stringify(body.reseauxSociaux || {}),
+        metaTitle: body.metaTitle,
+        metaDescription: body.metaDescription,
+        keywords: JSON.stringify(body.keywords || []),
+      },
+      create: {
+        id: 1, // 👈 Id unique obligatoire
+        nom: body.nom,
+        slogan: body.slogan,
+        email: body.email,
+        telephone: body.telephone,
+        adresse: body.adresse,
+        descriptionBreve: body.descriptionBreve,
+        descriptionLongue: body.descriptionLongue,
+        logo: body.logo,
+        couleurPrimaire: body.couleurPrimaire || '#3B82F6',
+        couleurSecondaire: body.couleurSecondaire || '#10B981',
+        reseauxSociaux: JSON.stringify(body.reseauxSociaux || {}),
+        metaTitle: body.metaTitle,
+        metaDescription: body.metaDescription,
+        keywords: JSON.stringify(body.keywords || []),
+      }
+    })
+
     return NextResponse.json({
       success: true,
       data: entreprise
