@@ -93,4 +93,64 @@ export default function EntreprisePage() {
             </div>
 
             <div>
-              <label className="bl
+              <label className="block text-sm font-medium mb-2">Slogan</label>
+              <Input
+                value={formData.slogan || ''}
+                onChange={e => setFormData({ ...formData, slogan: e.target.value })}
+                placeholder="Votre slogan accrocheur"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Email *</label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="contact@entreprise.fr"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Téléphone *</label>
+                <Input
+                  type="tel"
+                  value={formData.telephone}
+                  onChange={e => setFormData({ ...formData, telephone: e.target.value })}
+                  placeholder="+33 1 23 45 67 89"
+                  required
+                />
+              </div>
+            </div>
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? 'Sauvegarde...' : 'Sauvegarder la configuration'}
+            </Button>
+          </form>
+        </div>
+      </main>
+
+      {/* Popup succès */}
+      {saved && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+          <div className="bg-white rounded-lg p-6 w-80 text-center shadow-lg">
+            <p className="text-green-800 font-semibold mb-4">
+              ✅ Enregistrement effectué avec succès !
+            </p>
+            <button
+              onClick={() => {
+                setSaved(false)
+                window.location.href = '/'
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
