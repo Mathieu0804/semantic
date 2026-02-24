@@ -1,0 +1,23 @@
+# ─── Serveur web ─────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+
+# ─── Base de données ─────────────────────────────────────────────
+sqlalchemy[asyncio]>=2.0.0
+aiosqlite>=0.20.0
+
+# ─── HTTP client (Ollama + scrapers) ─────────────────────────────
+httpx>=0.27.0
+
+# ─── Config ──────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ─── Agents RL (CPU uniquement — pas besoin de GPU) ──────────────
+# torch CPU est suffisant pour LightRLAgent (Q-Learning)
+# Pour PPO+RND complet, installer torch avec CUDA si GPU dispo
+torch>=2.0.0
+numpy>=1.26.0
+
+# ─── Optionnel : scrapers web ────────────────────────────────────
+# Décommenter si tu utilises scraper_tool.py
+# playwright>=1.44.0
